@@ -5,9 +5,10 @@ Sample Java API (GET requests on the `/api/verve/accept`) to get count of unique
 
 ## To build java file:
 - first compile java code
-- Navigate to src folder then trigger : javac -d . com/java/restapi/SampleApi.java
+- javac -d out src/com/java/restapi/SampleApi.java
 - Once code compiled successfuly
-- Run java code : java com.java.restapi.SampleApi
+- Command to create jar file : jar cfm SampleApi.jar MANIFEST.MF -C out/ .
+- This command create SampleApi.jar file 
 - Server is running on port 8080
 
 ## Sample request:
