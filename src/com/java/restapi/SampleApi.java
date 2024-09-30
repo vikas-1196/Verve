@@ -25,13 +25,11 @@ public class SampleApi {
 
     static {
         try {
-            // Ensure the log directory exists
             File logDirectory = new File("log");
             if (!logDirectory.exists()) {
-                logDirectory.mkdir();  // Create the directory if it doesn't exist
+                logDirectory.mkdir();  
             }
 
-            // Log to file
             FileHandler fileHandler = new FileHandler("log/unique_requests.log", true);
             fileHandler.setFormatter(new SimpleFormatter());
             logger.addHandler(fileHandler);
@@ -41,21 +39,18 @@ public class SampleApi {
     }
 
     public static void main(String[] args) throws IOException {
-        // Set up the HTTP server
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-        server.createContext("/trackRequest", new TrackRequestHandler());
-        server.setExecutor(Executors.newCachedThreadPool()); // thread pool for concurrent handling
+        server.createContext("/api/verve/accept", new TrackRequestHandler());
+        server.setExecutor(Executors.newCachedThreadPool());
         server.start();
-        System.out.println("Server is running on port 8080...");
+        System.out.println("Server Stared in port 8080");
 
-        // Schedule the logging task every minute
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(() -> {
             logUniqueRequestsCount();
         }, 1, 1, TimeUnit.MINUTES);
     }
 
-    // HTTP Handler for tracking requests
     static class TrackRequestHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -64,13 +59,13 @@ public class SampleApi {
                 String id = query.split("id=")[1];
                 uniqueRequests.add(id);
                 currentMinuteRequests.add(id);
-                String response = "Request tracked for ID: " + id;
+                String response = "ok";
                 exchange.sendResponseHeaders(200, response.getBytes().length);
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
             } else {
-                String response = "ID not found in request";
+                String response = "failed";
                 exchange.sendResponseHeaders(400, response.getBytes().length);
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
@@ -79,9 +74,8 @@ public class SampleApi {
         }
     }
 
-    // Method to log unique request counts and clear the current minute set
     private static void logUniqueRequestsCount() {
         logger.info("Unique requests in this minute: " + currentMinuteRequests.size());
-        currentMinuteRequests.clear(); // Clear for the next minute
+        currentMinuteRequests.clear();
     }
 }
