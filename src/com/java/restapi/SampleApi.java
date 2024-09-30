@@ -21,7 +21,7 @@ public class SampleApi {
 
     static {
         try {
-            File logDirectory = new File("log");
+            File logDirectory = new File("../log");
             if (!logDirectory.exists()) {
                 logDirectory.mkdir();  
             }
