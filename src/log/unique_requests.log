@@ -8,3 +8,9 @@ Sept 30, 2024 10:38:43 PM com.java.restapi.SampleApi logUniqueRequestsCount
 INFO: Unique requests in this minute: 0
 Sept 30, 2024 10:39:43 PM com.java.restapi.SampleApi logUniqueRequestsCount
 INFO: Unique requests in this minute: 1
+Sept 30, 2024 10:43:58 PM com.java.restapi.SampleApi logUniqueRequestsCount
+INFO: Unique requests in this minute: 2
+Sept 30, 2024 10:44:58 PM com.java.restapi.SampleApi logUniqueRequestsCount
+INFO: Unique requests in this minute: 1
+Sept 30, 2024 10:45:58 PM com.java.restapi.SampleApi logUniqueRequestsCount
+INFO: Unique requests in this minute: 0

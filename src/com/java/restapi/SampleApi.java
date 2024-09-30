@@ -10,9 +10,6 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -20,7 +17,6 @@ import java.util.logging.SimpleFormatter;
 public class SampleApi {
 
     private static final Set<String> uniqueRequests = ConcurrentHashMap.newKeySet();
-    private static final Set<String> currentMinuteRequests = ConcurrentHashMap.newKeySet();
     private static final Logger logger = Logger.getLogger(SampleApi.class.getName());
 
     static {
@@ -41,41 +37,62 @@ public class SampleApi {
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
         server.createContext("/api/verve/accept", new TrackRequestHandler());
-        server.setExecutor(Executors.newCachedThreadPool());
+        server.setExecutor(null);
         server.start();
-        System.out.println("Server Stared in port 8080");
-
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.scheduleAtFixedRate(() -> {
-            logUniqueRequestsCount();
-        }, 1, 1, TimeUnit.MINUTES);
+        System.out.println("Server started on port 8080");
     }
 
     static class TrackRequestHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            String query = exchange.getRequestURI().getQuery();
-            if (query != null && query.contains("id=")) {
-                String id = query.split("id=")[1];
-                uniqueRequests.add(id);
-                currentMinuteRequests.add(id);
-                String response = "ok";
-                exchange.sendResponseHeaders(200, response.getBytes().length);
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            } else {
-                String response = "failed";
-                exchange.sendResponseHeaders(400, response.getBytes().length);
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            }
-        }
-    }
+            String response;
+            int statusCode;
 
-    private static void logUniqueRequestsCount() {
-        logger.info("Unique requests in this minute: " + currentMinuteRequests.size());
-        currentMinuteRequests.clear();
+            String query = exchange.getRequestURI().getQuery();
+            String id = null;
+
+            if (query != null) {
+                String[] params = query.split("&");
+                for (String param : params) {
+                    String[] keyValue = param.split("=");
+
+                    if (keyValue.length == 2) {
+                        String key = keyValue[0];
+                        String value = keyValue[1];
+
+                        if (key.equals("id")) {
+                            try {
+                                Integer.parseInt(value);
+                                id = value;
+                                uniqueRequests.add(id); 
+                            } catch (NumberFormatException e) {
+                                response = "failed";
+                                statusCode = 400;
+                                sendResponse(exchange, statusCode, response);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            
+            if (id == null) {
+                response = "failed"; 
+                statusCode = 400;
+            } else {
+                response = "ok";
+                statusCode = 200;
+            }
+
+            sendResponse(exchange, statusCode, response);
+        }
+
+        private void sendResponse(HttpExchange exchange, int statusCode, String responseMessage) throws IOException {
+            exchange.sendResponseHeaders(statusCode, responseMessage.getBytes().length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(responseMessage.getBytes());
+            os.close();
+        }
     }
 }
