@@ -8,8 +8,13 @@ Sample Java API (GET requests on the `/api/verve/accept`) to get count of unique
 - javac -d out src/com/java/restapi/SampleApi.java
 - Once code compiled successfuly
 - Command to create jar file : jar cfm SampleApi.jar MANIFEST.MF -C out/ .
-- This command create SampleApi.jar file 
+- This command create SampleApi.jar file
+- To run jar file: java -jar SampleApi.jar
 - Server is running on port 8080
+
+## Added sample jar file
+ - Run jar file : java -jar SampleApi.jar
+ - Trigger API to test
 
 ## Sample request:
  - http://localhost:8080/api/verve/accept?id=1 
